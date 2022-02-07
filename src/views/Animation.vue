@@ -1,5 +1,6 @@
 <script lang="ts">
 import { AmbientLight, AxesHelper, BoxGeometry, Mesh, MeshBasicMaterial, MeshLambertMaterial, PerspectiveCamera, PlaneBufferGeometry, Scene, SpotLight, Vector2, WebGLRenderer } from 'three'
+import Stats from 'stats.js'
 import { defineComponent } from 'vue'
 
 export default defineComponent({
@@ -10,7 +11,7 @@ export default defineComponent({
     // 摄像机
     const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
     // 摄像机位置
-    camera.position.x = -25
+    camera.position.x = -100
     camera.position.y = 70
     camera.position.z = 200
     camera.lookAt(scene.position)
@@ -18,6 +19,7 @@ export default defineComponent({
     // 渲染器
     const renderer = new WebGLRenderer()
     renderer.setSize(window.innerWidth, window.innerHeight)
+    renderer.shadowMap.enabled = true
 
     document.body.appendChild(renderer.domElement)
 
@@ -31,6 +33,7 @@ export default defineComponent({
     const boxMesh = new Mesh(boxGeometry, boxMaterial)
 
     boxMesh.position.set(20, 20, 20)
+    boxMesh.castShadow = true
 
     scene.add(boxMesh)
 
@@ -40,6 +43,7 @@ export default defineComponent({
     const planeMesh = new Mesh(planeGeometry, planeMaterial)
 
     planeMesh.rotation.x = -0.5 * Math.PI
+    planeMesh.receiveShadow = true
 
     scene.add(planeMesh)
 
@@ -58,13 +62,35 @@ export default defineComponent({
     spotLight.shadow.camera.near = 40
     scene.add(spotLight)
 
+    const stats = addStats()
+
     function animation () {
+      boxMesh.rotation.x += 0.01
+      boxMesh.rotation.y += 0.01
+      boxMesh.rotation.z += 0.01
+
       requestAnimationFrame(animation)
+
+      stats.update()
 
       renderer.render(scene, camera)
     }
 
+    function addStats () {
+      const stats = new Stats()
+
+      stats.dom.style.position = 'absolute'
+      stats.dom.style.top = '0'
+      stats.dom.style.left = '0'
+      stats.showPanel(0)
+
+      document.body.appendChild(stats.dom)
+
+      return stats
+    }
+
     animation()
   }
+
 })
 </script>
