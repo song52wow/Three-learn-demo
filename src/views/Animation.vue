@@ -2,6 +2,7 @@
 import { AmbientLight, AxesHelper, BoxGeometry, Mesh, MeshBasicMaterial, MeshLambertMaterial, PerspectiveCamera, PlaneBufferGeometry, Scene, SpotLight, Vector2, WebGLRenderer } from 'three'
 import Stats from 'stats.js'
 import { defineComponent } from 'vue'
+import * as dat from 'dat.gui'
 
 export default defineComponent({
   setup () {
@@ -64,10 +65,22 @@ export default defineComponent({
 
     const stats = addStats()
 
+    // dat
+    const ctrlObj = { rotationSpeed: 0.01, jumpSpeed: 0.01 }
+    const ctrl = new dat.GUI()
+    ctrl.add(ctrlObj, 'rotationSpeed', 0, 1)
+    ctrl.add(ctrlObj, 'jumpSpeed', 0, 1)
+
+    let gap = 0
+
     function animation () {
-      boxMesh.rotation.x += 0.01
-      boxMesh.rotation.y += 0.01
-      boxMesh.rotation.z += 0.01
+      boxMesh.rotation.x += ctrlObj.rotationSpeed
+      boxMesh.rotation.y += ctrlObj.rotationSpeed
+      boxMesh.rotation.z += ctrlObj.rotationSpeed
+
+      gap += ctrlObj.jumpSpeed
+      boxMesh.position.x = 25 + (20 * Math.sin(gap))
+      boxMesh.position.y = 10 + (20 * Math.abs(Math.cos(gap)))
 
       requestAnimationFrame(animation)
 
@@ -90,6 +103,16 @@ export default defineComponent({
     }
 
     animation()
+
+    window.addEventListener('resize', onWindowResize, false)
+
+    function onWindowResize () {
+      // 设置相机长宽比
+      camera.aspect = window.innerWidth / window.innerHeight
+      // 更新相机投影矩阵
+      camera.updateProjectionMatrix()
+      renderer.setSize(window.innerWidth, window.innerHeight)
+    }
   }
 
 })
